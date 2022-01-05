@@ -80,5 +80,8 @@
 
     <!-- Argon JS -->
     @include('includes.argon-js')
+
+    <!-- Chart Js -->
+    @yield('chart-js')
 </body>
 </html>

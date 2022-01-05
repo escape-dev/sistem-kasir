@@ -56,6 +56,7 @@ Route::prefix('admins')
     // dashboard admin
     Route::get('/dashboard', [DashboardAdminController::class, 'index'])->name('admins.dashboard');
     Route::get('/laporan/penjualan', [DashboardAdminController::class, 'data_penjualan'])->name('admins.laporan.penjualan');
+    Route::get('/laporan/pembelian', [DashboardAdminController::class, 'data_pembelian'])->name('admins.laporan.pembelian');
 });
 
 require __DIR__.'/auth.php';

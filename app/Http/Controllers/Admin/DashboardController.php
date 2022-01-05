@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Pembelian;
 use DateTime;
 use DateTimeZone;
 
@@ -32,9 +33,9 @@ class DashboardController extends Controller
     public function index() {
         $now = new DateTime("now", new DateTimeZone('Asia/Jakarta'));
         $past = new DateTime("now", new DateTimeZone('Asia/Jakarta'));
-        date_add($past, date_interval_create_from_date_string('-24 hours'));
-        $now_format = date_format($past, 'Y-m-d H:i:s');
-        $past_format = date_format($now, 'Y-m-d H:i:s');
+        $past->modify('-24 hour');
+        $now_format = date_format($now, 'Y-m-d H:i:s');
+        $past_format = date_format($past, 'Y-m-d H:i:s');
 
         $barangs = Barang::where('stok', '<=', 5)->cursor();
         $admins = User::where('role', '=', 'admin')->cursor();
@@ -43,7 +44,23 @@ class DashboardController extends Controller
         $pembelian = DetailPembelian::sum('subtotal');
         $pemasok = Pemasok::count();
 
-        $penjualan_terkini = DetailPenjualan::whereBetween('created_at', [$now_format, $past_format])->sum('subtotal');
+        $data = Penjualan::join('detail_penjualans', 'penjualans.id', '=', 'detail_penjualans.penjualan_id')
+            ->select('date', DB::raw('sum(subtotal) as total'))
+            ->whereBetween('detail_penjualans.created_at', [$past_format, $now_format])
+            ->groupBy('date')
+            ->get();
+
+        $data_chart[] = null;
+        $penjualan_terkini = $data->sum->total;
+
+        if ($data) {
+            foreach ($data as $chrt) {
+                $data_chart['label'][] = date('d-m-Y', strtotime($chrt->date));
+                $data_chart['data'][] = $chrt->total;
+            }
+        }
+
+        $chart = json_encode($data_chart);
 
         return view('pages.dashboard-admin')->with([
             'barangs' => $barangs,
@@ -52,6 +69,7 @@ class DashboardController extends Controller
             'penjualan' => $penjualan,
             'pembelian' => $pembelian,
             'pemasok' => $pemasok,
+            'data_chart' => $chart,
             'penjualan_terkini' => $penjualan_terkini
         ]);
     }
@@ -64,6 +82,18 @@ class DashboardController extends Controller
 
         return view('pages.penjualan.laporan-penjualan')->with([
             'penjualans' => $penjualan
+        ]);
+    }
+
+    public function data_pembelian() {
+        $pembelian = Pembelian::join('detail_pembelians', 'pembelians.id', '=', 'detail_pembelians.pembelian_id')
+            ->join('pemasoks', 'pembelians.pemasok_id', '=', 'pemasoks.id')
+            ->select('pembelians.id', 'date', 'pemasoks.name as pemasok', DB::raw('sum(subtotal) as total'))
+            ->groupBy('pembelians.id', 'date', 'pemasoks.name')
+            ->paginate(5);
+
+        return view('pages.pembelian.laporan-pembelian')->with([
+            'pembelians' => $pembelian
         ]);
     }
 }

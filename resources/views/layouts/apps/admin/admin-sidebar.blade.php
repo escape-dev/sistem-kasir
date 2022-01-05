@@ -35,6 +35,12 @@
                             <span class="nav-link-text">Laporan Penjualan</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('admins/laporan/pembelian') ? 'active' : '' }}" href="{{ route('admins.laporan.pembelian') }}">
+                            <i class="ni ni-money-coins text-orange"></i>
+                            <span class="nav-link-text">Laporan Pembelian</span>
+                        </a>
+                    </li>
                 </ul>
                 <!-- Divider -->
                 <hr class="my-3">
