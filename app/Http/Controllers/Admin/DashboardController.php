@@ -33,9 +33,9 @@ class DashboardController extends Controller
     public function index() {
         $now = new DateTime("now", new DateTimeZone('Asia/Jakarta'));
         $past = new DateTime("now", new DateTimeZone('Asia/Jakarta'));
-        $past->modify('-24 hour');
-        $now_format = date_format($now, 'Y-m-d H:i:s');
-        $past_format = date_format($past, 'Y-m-d H:i:s');
+        $past->modify('-7 days');
+        $now_format = date_format($now, 'Y-m-d');
+        $past_format = date_format($past, 'Y-m-d');
 
         $barangs = Barang::where('stok', '<=', 5)->cursor();
         $admins = User::where('role', '=', 'admin')->cursor();
@@ -44,10 +44,12 @@ class DashboardController extends Controller
         $pembelian = DetailPembelian::sum('subtotal');
         $pemasok = Pemasok::count();
 
+//        dd($past_format, $now_format);
+
         $data = Penjualan::join('detail_penjualans', 'penjualans.id', '=', 'detail_penjualans.penjualan_id')
-            ->select('date', DB::raw('sum(subtotal) as total'))
-            ->whereBetween('detail_penjualans.created_at', [$past_format, $now_format])
-            ->groupBy('date')
+            ->select(DB::raw('date(date) as tanggal'), DB::raw('sum(subtotal) as total'))
+            ->whereBetween(DB::raw('date(date)'), [$past_format, $now_format])
+            ->groupBy('tanggal')
             ->get();
 
         $data_chart[] = null;
@@ -55,12 +57,14 @@ class DashboardController extends Controller
 
         if ($data) {
             foreach ($data as $chrt) {
-                $data_chart['label'][] = date('d-m-Y', strtotime($chrt->date));
+                $data_chart['label'][] = $chrt->tanggal;
                 $data_chart['data'][] = $chrt->total;
             }
         }
 
         $chart = json_encode($data_chart);
+
+//        dd($chart);
 
         return view('pages.dashboard-admin')->with([
             'barangs' => $barangs,
