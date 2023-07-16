@@ -46,7 +46,8 @@
                     <div class="form-group">
                         <label for="stok-barang" class="form-control-label">Stok Barang</label>
                         <input class="form-control @error('stok') is-invalid @enderror" name="stok"
-                            placeholder="Stok Barang" type="number" id="stok-barang" value="{{ $barang->stok }}" required>
+                            placeholder="Stok Barang" type="number" id="stok-barang" value="{{ $barang->stok }}"
+                            required>
                         @error('stok')
                         <div class="invalid-feedback">
                             {{ $message }}

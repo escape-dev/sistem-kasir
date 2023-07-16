@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Barang;
 use App\Models\DetailPembelian;
 use App\Models\DetailPenjualan;
+use App\Http\Requests\BarangStoreRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use RealRashid\SweetAlert\Facades\Alert;
@@ -51,13 +52,9 @@ class BarangController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(BarangStoreRequest $request)
     {
-        $request->validate([
-            'name' => 'required|unique:barangs,name',
-            'price' => 'required|numeric',
-            'stok' => 'required|numeric'
-        ]);
+        $request->validated();
 
         Barang::create([
             'name' => $request->name,
@@ -101,20 +98,9 @@ class BarangController extends Controller
      * @param  \App\Models\Barang  $barang
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $barang)
+    public function update(BarangStoreRequest $request, $barang)
     {
-        $old_name = Barang::findOrFail($barang);
-
-        $request->validate([
-            'price' => 'required|numeric',
-            'stok' => 'required|numeric'
-        ]);
-
-        if ($request->name !== $old_name->name) {
-            $request->validate([
-                'name' => 'required|unique:barangs,name'
-            ]);
-        }
+        $request->validated();
 
         Barang::where('id', $barang)->update([
             'name' => $request->name,
