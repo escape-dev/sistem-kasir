@@ -29,7 +29,7 @@ class KasirController extends Controller
      */
     public function index()
     {
-        $kasir = User::where('role', '=', 'kasir')->orderBy('name', 'asc')->paginate(6);
+        $kasir = User::kasir();
 
         return view('pages.kasir.index')->with([
             'kasirs' => $kasir

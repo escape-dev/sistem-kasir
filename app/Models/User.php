@@ -19,6 +19,11 @@ class User extends Authenticatable
         return $this->where('role', '=', 'admin')->orderBy('name', 'asc')->paginate(6);
     }
 
+    public function scopeKasir()
+    {
+        return $this->where('role', '=', 'kasir')->orderBy('name', 'asc')->paginate(6);
+    }
+
     /**
      * The attributes that are mass assignable.
      *
