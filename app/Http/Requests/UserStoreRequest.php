@@ -25,8 +25,10 @@ class UserStoreRequest extends FormRequest
      */
     public function rules()
     {
+        $user_id = $this->admin ? $this->admin : $this->kasir;
+        
         return [
-            'email'    => ['required', 'string', 'max:255', Rule::unique('users')->ignore($this->admin)],
+            'email'    => ['required', 'string', 'max:255', Rule::unique('users')->ignore($user_id)],
             'name'     => 'required|string|max:255',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ];

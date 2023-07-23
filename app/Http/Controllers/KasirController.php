@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rules;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Gate;
+use App\Http\Requests\UserStoreRequest;
 
 use App\Models\User;
 
@@ -51,13 +52,9 @@ class KasirController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(UserStoreRequest $request)
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()]
-        ]);
+        $request->validated();
 
         User::create([
             'name' => $request->name,
@@ -102,20 +99,9 @@ class KasirController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UserStoreRequest $request, $id)
     {
-        $old_email = User::findOrFail($id);
-
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()]
-        ]);
-
-        if ($request->email !== $old_email->email) {
-            $request->validate([
-                'email' => ['required', 'string', 'email', 'max:255', 'unique:users']
-            ]);
-        }
+        $request->validated();
 
         User::where('id', $id)->update([
             'name' => $request->name,
