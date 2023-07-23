@@ -14,6 +14,11 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, Uuids;
 
+    public function scopeAdmin() 
+    {
+        return $this->where('role', '=', 'admin')->orderBy('name', 'asc')->paginate(6);
+    }
+
     /**
      * The attributes that are mass assignable.
      *

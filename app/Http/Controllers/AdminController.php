@@ -28,7 +28,7 @@ class AdminController extends Controller
      */
     public function index()
     {
-        $admin = User::where('role', '=', 'admin')->orderBy('name', 'asc')->paginate(6);
+        $admin = User::Admin();
 
         return view('pages.admin.index')->with([
             'admins' => $admin
