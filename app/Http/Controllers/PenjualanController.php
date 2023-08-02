@@ -32,11 +32,11 @@ class PenjualanController extends Controller
     public function index() 
     {
         $nota     = Str::uuid()->toString();
-        $tanggal  = now()->format('d-m-Y');
         $barangs  = Barang::cursor(); 
         $items    = Cart::session(Auth::user()->id)->getContent();
         $subtotal = Cart::session(Auth::user()->id)->getSubTotal();
         $total    = Cart::session(Auth::user()->id)->getTotal();
+        $tanggal  = now()->format('d-m-Y');
 
         return view('pages.penjualan.index')->with([
             'nota'      => $nota,
