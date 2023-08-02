@@ -30,6 +30,8 @@ class Penjualan extends Model
         ]);
 
         $mappedItem = $items->map(function($item, $key) use ($penjualan){
+            Penjualan::reduceStok($item->id, $item->quantity);
+
             return [
                 'id'           => Str::uuid(),
                 'penjualan_id' => $penjualan->id,
@@ -40,5 +42,12 @@ class Penjualan extends Model
         });
 
         return DetailPenjualan::insert($mappedItem->toArray());
+    }
+
+    public static function reduceStok($barang_id, $qty)
+    {
+        $barang       = Barang::findOrFail($barang_id);
+        $barang->stok = $barang->stok - $qty;
+        $barang->save();
     }
 }
