@@ -73,6 +73,13 @@ class PenjualanController extends Controller
         return redirect()->back();
     }
 
+    public function removeCart($id) 
+    {
+        Cart::session(Auth::user()->id)->remove($id);
+
+        return redirect()->back();
+    }
+
     /**
      * Show the form for creating a new resource.
      *

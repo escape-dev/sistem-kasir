@@ -31,7 +31,7 @@ Route::get('/penjualan', [PenjualanController::class, 'index'])->middleware('aut
 Route::get('/penjualan/{penjualan}', [PenjualanController::class, 'penjualan'])->middleware('auth')->name('penjualan');
 Route::post('/add-barang/penjualan', [PenjualanController::class, 'addToCart'])->middleware('auth')->name('add-barang.penjualan');
 Route::put('/penjualan/{penjualan}', [PenjualanController::class, 'update'])->middleware('auth')->name('penjualan.update');
-Route::delete('/penjualan/{penjualan}', [PenjualanController::class, 'destroy'])->middleware('auth')->name('penjualan.destroy');
+Route::delete('/penjualan/{penjualan}', [PenjualanController::class, 'removeCart'])->middleware('auth')->name('penjualan.destroy');
 Route::get('/simpan/penjualan/{penjualan}', [PenjualanController::class, 'simpan'])->middleware('auth')->name('simpan.penjualan');
 
 //Route Pembelian
