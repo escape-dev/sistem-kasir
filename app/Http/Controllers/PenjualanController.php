@@ -31,19 +31,15 @@ class PenjualanController extends Controller
 
     public function index() 
     {
-        $nota     = Str::uuid()->toString();
         $barangs  = Barang::cursor(); 
         $items    = Cart::session(Auth::user()->id)->getContent();
-        $subtotal = Cart::session(Auth::user()->id)->getSubTotal();
         $total    = Cart::session(Auth::user()->id)->getTotal();
         $tanggal  = now()->format('d-m-Y');
 
         return view('pages.penjualan.index')->with([
-            'nota'      => $nota,
             'tanggal'   => $tanggal,
             'items'     => $items,
             'total'     => $total,
-            'subtotal'  => $subtotal,
             'barangs'   => $barangs
         ]);
     }
@@ -58,7 +54,7 @@ class PenjualanController extends Controller
         $barang = Barang::findOrFail($request->id);
 
         switch (True){
-            case $barang->stok > $request->qty:
+            case $barang->stok > $request->quantity:
                 Cart::session(Auth::user()->id)->add([
                     'id'        => $request->id,
                     'name'      => $barang->name,
@@ -73,6 +69,28 @@ class PenjualanController extends Controller
         return redirect()->back();
     }
 
+    public function updateCart(Request $request, $id)
+    {
+        $request->validate([
+            'quantity' => 'required|numeric'
+        ]);
+
+        $barang = Barang::findOrFail($request->id);
+        $item   = Cart::session(Auth::user()->id)->get($id);
+
+        switch (True){
+            case $barang->stok > $request->quantity:
+                $item->quantity = $request->quantity;
+                break;
+            default :
+                Alert::error('Error', 'Stok tidak cukup');
+        }
+
+
+
+        return redirect()->back();
+    }
+
     public function removeCart($id) 
     {
         Cart::session(Auth::user()->id)->remove($id);
@@ -80,111 +98,13 @@ class PenjualanController extends Controller
         return redirect()->back();
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    public function saveCart(Request $request)
     {
-        $penjualan = Penjualan::latest()->first();
+        $items     = Cart::session(Auth::user()->id)->getContent();
+        $user_id   = Auth::user()->id;
+        $penjualan = Penjualan::createPenjualan($user_id, $items);
 
-        if (empty($penjualan)) {
-            $user_id = Auth::user()->id;
-            $date = new DateTime("now", new DateTimeZone('Asia/Jakarta'));
-
-            $id_penjualan = Penjualan::create([
-                'user_id' => $user_id,
-                'date' => $date
-            ]);
-        } else {
-            $id_penjualan = $penjualan->id;
-        }
-
-        return redirect()->route('penjualan',  $id_penjualan);
-    }
-
-    public function penjualan($id_penjualan)
-    {
-        $nota             = Str::uuid()->toString();
-        $detail_penjualan = DetailPenjualan::with('barang')->get();
-        $total_harga      = $detail_penjualan->sum->subtotal;
-        $barangs          = Barang::cursor();
-        $tanggal          = now();
-
-        return view('pages.penjualan.index')->with([
-            'nota'              => $nota,
-            'tanggal'           => $tanggal,
-            'total'             => $total_harga,
-            'detail_penjualans' => $detail_penjualan,
-            'barangs'           => $barangs
-        ]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Penjualan  $penjualan
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $penjualan)
-    {
-        $request->validate([
-            'qty' => 'required|numeric'
-        ]);
-
-        $subtotal = $request->qty * $request->price;
-
-        switch (True){
-            case $request->stok > $request->qty:
-                DetailPenjualan::where('id', $penjualan)->update([
-                    'qty' => $request->qty,
-                    'subtotal' => $subtotal
-                ]);
-                break;
-            default :
-                Alert::error('Error', 'Stok tidak cukup');
-        }
-
-        return redirect()->back();
-    }
-
-    public function simpan($penjualan)
-    {
-        $detail_penjualan = DetailPenjualan::where('penjualan_id', '=', $penjualan)->get();
-
-        if (!empty($detail_penjualan)) {
-            foreach ($detail_penjualan as $penjualan) {
-                $barang = Barang::findOrFail($penjualan->barang_id);
-
-                $stok = $barang->stok - $penjualan->qty;
-                Barang::where('id', $penjualan->barang_id)->update([
-                    'stok' => $stok
-                ]);
-            }
-        }
-
-        $user_id = Auth::user()->id;
-        $date = new DateTime("now", new DateTimeZone('Asia/Jakarta'));
-
-        $id_penjualan = Penjualan::create([
-            'user_id' => $user_id,
-            'date' => $date
-        ]);
-
-        return redirect()->route('penjualan',  $id_penjualan);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Penjualan  $penjualan
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($penjualan)
-    {
-        DetailPenjualan::destroy($penjualan);
+        Cart::session(Auth::user()->id)->clear();
 
         return redirect()->back();
     }

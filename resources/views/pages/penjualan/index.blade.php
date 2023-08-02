@@ -23,11 +23,11 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-3">
-                        <label for="no-nota">Nota</label>
+                        <label for="no-nota">ID Kasir</label>
                     </div>
                     <div class="col">
-                        <input type="text" id="no-nota" value="{{ $nota }}" class="form-control form-control-muted"
-                            disabled>
+                        <input type="text" id="no-nota" value="{{ Auth::user()->id }}"
+                            class="form-control form-control-muted" disabled>
                     </div>
                 </div>
                 <div class="row mt-2">
@@ -131,13 +131,12 @@
                                 <form action="{{ route('penjualan.update', $item->id) }}" method="POST">
                                     @csrf
                                     @method('put')
-                                    <input type="hidden" value="{{ $item->price }}" name="price">
-                                    <input type="number" value="{{ $item->quantity }}" name="qty">
+                                    <input type="number" value="{{ $item->quantity }}" name="quantity">
                                     <button type="submit" class="btn btn-sm btn-warning"><i
                                             class="ni ni-settings-gear-65 text-netral"></i></button>
                                 </form>
                             </td>
-                            <td> {{ $subtotal }} </td>
+                            <td> {{ $item->price * $item->quantity }} </td>
                             <td>
                                 <form class="d-inline" onsubmit="return confirm('Data will be Deleted, Are you sure?')"
                                     action="{{ route('penjualan.destroy', $item->id) }}" method="post">
@@ -182,7 +181,7 @@
             </div>
             <div class="row">
                 <div class="col ml-2 mb-2">
-                    <a href="{{ route('simpan.penjualan', $nota) }}" class="btn btn-primary w-25"> Simpan </a>
+                    <a href="{{ route('simpan.penjualan') }}" class="btn btn-primary w-25"> Simpan </a>
                 </div>
             </div>
         </div>

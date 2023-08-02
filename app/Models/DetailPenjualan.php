@@ -10,7 +10,7 @@ class DetailPenjualan extends Model
 {
     use HasFactory, Uuids;
 
-    protected $guarded = ['id'];
+    protected $fillable = ['id', 'penjualan_id', 'barang_id', 'qty', 'subtotal'];
 
     public function barang() 
     {

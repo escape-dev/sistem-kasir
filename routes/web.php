@@ -28,11 +28,10 @@ Route::get('/', [DashboardController::class, 'index'])->middleware(['auth'])->na
 
 // Route Penjualan
 Route::get('/penjualan', [PenjualanController::class, 'index'])->middleware('auth')->name('penjualan.send');
-Route::get('/penjualan/{penjualan}', [PenjualanController::class, 'penjualan'])->middleware('auth')->name('penjualan');
 Route::post('/add-barang/penjualan', [PenjualanController::class, 'addToCart'])->middleware('auth')->name('add-barang.penjualan');
-Route::put('/penjualan/{penjualan}', [PenjualanController::class, 'update'])->middleware('auth')->name('penjualan.update');
-Route::delete('/penjualan/{penjualan}', [PenjualanController::class, 'removeCart'])->middleware('auth')->name('penjualan.destroy');
-Route::get('/simpan/penjualan/{penjualan}', [PenjualanController::class, 'simpan'])->middleware('auth')->name('simpan.penjualan');
+Route::put('/penjualan/{id}', [PenjualanController::class, 'updateCart'])->middleware('auth')->name('penjualan.update');
+Route::delete('/penjualan/{id}', [PenjualanController::class, 'removeCart'])->middleware('auth')->name('penjualan.destroy');
+Route::get('/simpan/penjualan', [PenjualanController::class, 'saveCart'])->middleware('auth')->name('simpan.penjualan');
 
 //Route Pembelian
 Route::get('/pemasok', [PembelianController::class, 'pemasok'])->middleware('auth')->name('pemasok.pemasok');
