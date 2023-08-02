@@ -12,7 +12,7 @@
 @endsection
 
 @section('penjualan')
-    {{ 'active' }}
+{{ 'active' }}
 @endsection
 
 @section('card-stats')
@@ -26,7 +26,8 @@
                         <label for="no-nota">Nota</label>
                     </div>
                     <div class="col">
-                        <input type="text" id="no-nota" value="{{ $penjualan->id }}" class="form-control form-control-muted" disabled>
+                        <input type="text" id="no-nota" value="{{ $nota }}" class="form-control form-control-muted"
+                            disabled>
                     </div>
                 </div>
                 <div class="row mt-2">
@@ -43,7 +44,8 @@
                         <label for="nama">Nama Kasir</label>
                     </div>
                     <div class="col">
-                        <input type="text" id="nama" value="{{ Auth::user()->name }}" class="form-control form-control-muted" disabled>
+                        <input type="text" id="nama" value="{{ Auth::user()->name }}"
+                            class="form-control form-control-muted" disabled>
                     </div>
                 </div>
             </div>
@@ -57,7 +59,8 @@
                     <div class="col">
                         <h3 class="card-title text-uppercase text-muted">Total Bayar</h3>
                         <span class="h2 font-weight-bold mt-2">
-                            <h1 class="display-1"> Rp {{ empty($total) ? '0' : number_format($total, 2, ',', '.') }} </h1>
+                            <h1 class="display-1"> Rp {{ empty($total) ? '0' : number_format($total, 2, ',', '.') }}
+                            </h1>
                         </span>
                     </div>
                 </div>
@@ -74,10 +77,10 @@
             <div class="card-header border-0">
                 <form action="{{ route('add-barang.penjualan') }}" method="POST">
                     @csrf
-                    <input type="hidden" value="{{ $penjualan->id }}" name="penjualan">
                     <div class="row align-items-center">
                         <div class="form-group col-4">
-                            <select class="form-control @error('name') is-invalid @enderror" name="barang" id="namaBarang" required>
+                            <select class="form-control @error('name') is-invalid @enderror" name="id" id="namaBarang"
+                                required>
                                 @foreach ($barangs as $barang)
                                 <option value="{{ $barang->id }}">{{ $barang->name }}</option>
                                 @endforeach
@@ -89,7 +92,7 @@
                             @enderror
                         </div>
                         <div class="form-group col-2">
-                            <input type="number" name="qty" placeholder="Jumlah" class="form-control" required>
+                            <input type="number" name="quantity" placeholder="Jumlah" class="form-control" required>
                         </div>
                         <div class="form-group col">
                             <button type="submit" class="btn btn-primary"> Tambah </button>
@@ -117,30 +120,31 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @if ($detail_penjualans->count())
+                        @if ($items->count())
 
-                        @foreach ($detail_penjualans as $detail_penjualan)
+                        @foreach ($items as $item)
                         <tr>
-                            <td> {{ $detail_penjualan->barang_id }} </td>
-                            <td> {{ $detail_penjualan->barang->name }} </td>
-                            <td> {{ $detail_penjualan->barang->price }} </td>
+                            <td> {{ $item->id }} </td>
+                            <td> {{ $item->name }} </td>
+                            <td> {{ $item->price }} </td>
                             <td>
-                                <form action="{{ route('penjualan.update', $detail_penjualan->id) }}" method="POST">
+                                <form action="{{ route('penjualan.update', $item->id) }}" method="POST">
                                     @csrf
                                     @method('put')
-                                    <input type="hidden" value="{{ $detail_penjualan->barang->price }}" name="price">
-                                    <input type="hidden" value="{{ $detail_penjualan->barang->stok }}" name="stok">
-                                    <input type="number" value="{{ $detail_penjualan->qty }}" name="qty">
-                                    <button type="submit" class="btn btn-sm btn-warning"><i class="ni ni-settings-gear-65 text-netral"></i></button>
+                                    <input type="hidden" value="{{ $item->price }}" name="price">
+                                    <input type="number" value="{{ $item->quantity }}" name="qty">
+                                    <button type="submit" class="btn btn-sm btn-warning"><i
+                                            class="ni ni-settings-gear-65 text-netral"></i></button>
                                 </form>
                             </td>
-                            <td> {{ $detail_penjualan->subtotal }} </td>
+                            <td> {{ $subtotal }} </td>
                             <td>
                                 <form class="d-inline" onsubmit="return confirm('Data will be Deleted, Are you sure?')"
-                                    action="{{ route('penjualan.destroy', $detail_penjualan->id) }}" method="post">
+                                    action="{{ route('penjualan.destroy', $item->id) }}" method="post">
                                     @csrf
                                     @method('delete')
-                                    <input type="submit" class="btn btn-sm btn-danger waves-effect waves-light" value="Delete">
+                                    <input type="submit" class="btn btn-sm btn-danger waves-effect waves-light"
+                                        value="Delete">
                                 </form>
                             </td>
                         </tr>
@@ -178,7 +182,7 @@
             </div>
             <div class="row">
                 <div class="col ml-2 mb-2">
-                    <a href="{{ route('simpan.penjualan', $penjualan->id) }}" class="btn btn-primary w-25"> Simpan </a>
+                    <a href="{{ route('simpan.penjualan', $nota) }}" class="btn btn-primary w-25"> Simpan </a>
                 </div>
             </div>
         </div>
@@ -187,14 +191,14 @@
 @endsection
 
 @section('custom-js')
-    <script>
-        $(document).ready(function() {
+<script>
+    $(document).ready(function() {
             $('#namaBarang').select2();
         });
-    </script>
+</script>
 
-    <script>
-        function sum() {
+<script>
+    function sum() {
 
             var dibayar = document.getElementById('dibayar').value
 
@@ -219,5 +223,5 @@
             rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah
             return prefix == undefined ? rupiah : (rupiah ? 'Rp. ' + rupiah : '')
         }
-    </script>
+</script>
 @endsection

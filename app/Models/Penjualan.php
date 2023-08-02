@@ -10,7 +10,7 @@ class Penjualan extends Model
 {
     use HasFactory, Uuids;
 
-    protected $guarded = ['id'];
+    protected $fillable = ['id', 'user_id', 'date', 'created_at', 'updated_at'];
 
     public function detail_penjualan()
     {

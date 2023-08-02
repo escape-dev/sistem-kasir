@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Cart;
 use DateTime;
 use DateTimeZone;
 
@@ -9,6 +10,7 @@ use App\Models\Barang;
 use App\Models\Penjualan;
 use App\Models\DetailPenjualan;
 
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -25,6 +27,50 @@ class PenjualanController extends Controller
 
             abort(403, 'Anda tidak memiliki cukup hak akses');
         });
+    }
+
+    public function index() 
+    {
+        $nota     = Str::uuid()->toString();
+        $tanggal  = now()->format('d-m-Y');
+        $barangs  = Barang::cursor(); 
+        $items    = Cart::session(Auth::user()->id)->getContent();
+        $subtotal = Cart::session(Auth::user()->id)->getSubTotal();
+        $total    = Cart::session(Auth::user()->id)->getTotal();
+
+        return view('pages.penjualan.index')->with([
+            'nota'      => $nota,
+            'tanggal'   => $tanggal,
+            'items'     => $items,
+            'total'     => $total,
+            'subtotal'  => $subtotal,
+            'barangs'   => $barangs
+        ]);
+    }
+
+    public function addToCart(Request $request)
+    {
+        $request->validate([
+            'id'       => 'required',
+            'quantity' => 'required|numeric',
+        ]);
+
+        $barang = Barang::findOrFail($request->id);
+
+        switch (True){
+            case $barang->stok > $request->qty:
+                Cart::session(Auth::user()->id)->add([
+                    'id'        => $request->id,
+                    'name'      => $barang->name,
+                    'price'     => $barang->price,
+                    'quantity'  => $request->quantity
+                ]);
+                break;
+            default :
+                Alert::error('Error', 'Stok tidak cukup');
+        }
+
+        return redirect()->back();
     }
 
     /**
@@ -53,52 +99,19 @@ class PenjualanController extends Controller
 
     public function penjualan($id_penjualan)
     {
-        $nota = Penjualan::findOrFail($id_penjualan);
-        $detail_penjualan = DetailPenjualan::where('penjualan_id', '=', $id_penjualan)->with('barang')->get();
-        $total_harga = $detail_penjualan->sum->subtotal;
-        $barangs = Barang::cursor();
-        $tanggal = date('d-m-Y', strtotime($nota->date));
+        $nota             = Str::uuid()->toString();
+        $detail_penjualan = DetailPenjualan::with('barang')->get();
+        $total_harga      = $detail_penjualan->sum->subtotal;
+        $barangs          = Barang::cursor();
+        $tanggal          = now();
 
         return view('pages.penjualan.index')->with([
-            'penjualan' => $nota,
-            'tanggal' => $tanggal,
-            'total' => $total_harga,
+            'nota'              => $nota,
+            'tanggal'           => $tanggal,
+            'total'             => $total_harga,
             'detail_penjualans' => $detail_penjualan,
-            'barangs' => $barangs
+            'barangs'           => $barangs
         ]);
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'penjualan' => 'required',
-            'barang' => 'required',
-            'qty' => 'required|numeric'
-        ]);
-
-        $barang = Barang::findOrFail($request->barang);
-        $subtotal = $request->qty * $barang->price;
-
-        switch (True){
-            case $barang->stok > $request->qty:
-                DetailPenjualan::create([
-                    'penjualan_id' => $request->penjualan,
-                    'barang_id' => $request->barang,
-                    'subtotal' => $subtotal,
-                    'qty' => $request->qty
-                ]);
-                break;
-            default :
-                Alert::error('Error', 'Stok tidak cukup');
-        }
-
-        return redirect()->back();
     }
 
     /**
